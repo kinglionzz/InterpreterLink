@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">My Assignments</h3>
+    <a href="{{ url_for('interpreter_dashboard') }}" class="btn btn-outline-secondary btn-sm">← Back to Dashboard</a>
+</div>
+
+{% if assignments %}
+    <div class="row g-3">
+        {% for assignment in assignments %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="fw-bold mb-1">{{ assignment.timetable.course_code }}</h6>
+                            <small class="text-muted">{{ assignment.timetable.course_title }}</small>
+                        </div>
+                        <div>
+                            {% if assignment.status == 'Assigned' %}
+                                <span class="badge bg-primary">Assigned</span>
+                            {% elif assignment.status == 'Present' %}
+                                <span class="badge bg-success">Present</span>
+                            {% elif assignment.status == 'Absent' %}
+                                <span class="badge bg-danger">Absent</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ assignment.status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <p class="mb-1"><strong>Day:</strong> {{ assignment.timetable.day }}</p>
+                    <p class="mb-1"><strong>Time:</strong> {{ assignment.timetable.time }}</p>
+                    <p class="mb-1"><strong>Venue:</strong> {{ assignment.timetable.venue }}</p>
+                    <p class="mb-1"><strong>Student:</strong> {{ assignment.timetable.student.full_name }}</p>
+                    <p class="mb-1"><strong>Level:</strong> {{ assignment.timetable.level or '-' }}</p>
+                    <p class="mb-0">
+                        <strong>Department:</strong>
+                        {% if assignment.timetable.student.department_colour %}
+                            <span class="dept-badge" style="background-color: {{ assignment.timetable.student.department_colour }};">
+                                {{ assignment.timetable.department }}
+                            </span>
+                        {% else %}
+                            {{ assignment.timetable.department or '-' }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card p-5 text-center">
+        <h5 class="text-muted">No assignments yet</h5>
+        <p class="text-muted mb-0">When students add classes, they will appear here.</p>
+    </div>
+{% endif %}
+{% endblock %}

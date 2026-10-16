@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">HOI Dashboard</h3>
+    <span class="badge bg-primary">Total Interpreters: {{ total_interpreters }}</span>
+    <a href="{{ url_for('hoi_complaints') }}" class="btn btn-outline-danger btn-sm">
+        View Complaints
+    </a>
+</div>
+
+<!-- Time Slot Summary -->
+<div class="card p-4 mb-4">
+    <h5 class="fw-bold mb-3">Time Slot Overview</h5>
+    {% if slot_summary %}
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Day & Time</th>
+                        <th>Total Classes</th>
+                        <th>Assigned</th>
+                        <th>Pending</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slot, data in slot_summary.items() %}
+                    <tr>
+                        <td><strong>{{ slot }}</strong></td>
+                        <td>{{ data.total }}</td>
+                        <td class="text-success">{{ data.assigned }}</td>
+                        <td class="text-danger">{{ data.pending }}</td>
+                        <td>
+                            {% if data.pending == 0 %}
+                                <span class="badge bg-success">Fully Covered</span>
+                            {% elif data.assigned == 0 %}
+                                <span class="badge bg-danger">No Interpreter</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Partially Covered</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted mb-0">No classes uploaded yet.</p>
+    {% endif %}
+</div>
+
+<!-- All Classes -->
+<div class="card p-4">
+    <h5 class="fw-bold mb-3">All Classes</h5>
+
+    {% if classes %}
+        <div class="row g-3">
+            {% for class in classes %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm {% if not class.assignment or not class.assignment.interpreter %}border-warning{% endif %}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ class.course_code }}</h6>
+                                <small class="text-muted">{{ class.course_title }}</small>
+                            </div>
+                            <div>
+                                {% if class.assignment %}
+                                    {% if class.assignment.status == 'Assigned' %}
+                                        <span class="badge bg-primary">Assigned</span>
+                                    {% elif class.assignment.status == 'Present' %}
+                                        <span class="badge bg-success">Present</span>
+                                    {% elif class.assignment.status == 'Absent' %}
+                                        <span class="badge bg-danger">Absent</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ class.assignment.status }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <p class="mb-1"><strong>Day:</strong> {{ class.day }}</p>
+                        <p class="mb-1"><strong>Time:</strong> {{ class.time }}</p>
+                        <p class="mb-1"><strong>Venue:</strong> {{ class.venue }}</p>
+                        <p class="mb-1"><strong>Level:</strong> {{ class.level or '-' }}</p>
+                        <p class="mb-1">
+                            <strong>Department:</strong>
+                            <span class="dept-badge" style="background-color:
+                                {% if class.department and 'Computer Science' in class.department %}#FBBF24
+                                {% elif class.department and 'Special Education' in class.department %}#991B1B
+                                {% else %}#64748b{% endif %};">
+                                {{ class.department or '-' }}
+                            </span>
+                        </p>
+                        <p class="mb-3">
+                            <strong>Interpreter:</strong>
+                            {% if class.assignment and class.assignment.interpreter %}
+                                {{ class.assignment.interpreter.full_name }}
+                            {% else %}
+                                <span class="text-danger">Not assigned</span>
+                            {% endif %}
+                        </p>
+
+                        <a href="{{ url_for('hoi_reassign', timetable_id=class.id) }}" class="btn btn-sm btn-outline-primary w-100">
+                            Re-assign
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">No classes have been uploaded yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

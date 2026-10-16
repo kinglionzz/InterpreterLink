@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+<p>Welcome, <strong>{{ current_user.full_name }}</strong></p>
+
+<div class="mb-4">
+    <a href="{{ url_for('generate_code', role='interpreter') }}" class="btn btn-info me-2">Generate Interpreter Code</a>
+    <a href="{{ url_for('generate_code', role='hoi') }}" class="btn btn-warning">Generate HOI Code</a>
+</div>
+
+<h4>Registration Codes</h4>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for code in codes %}
+        <tr>
+            <td><strong>{{ code.code }}</strong></td>
+            <td>{{ code.role }}</td>
+            <td>
+                {% if code.is_used %}
+                    <span class="badge bg-secondary">Used</span>
+                {% else %}
+                    <span class="badge bg-success">Available</span>
+                {% endif %}
+            </td>
+            <td>{{ code.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-center">No codes generated yet</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

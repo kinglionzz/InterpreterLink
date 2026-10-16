@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">My Timetable</h3>
+    <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary btn-sm">← Back to Dashboard</a>
+</div>
+
+<div class="row">
+    {% if is_class_rep %}
+    <div class="col-lg-4 mb-4">
+        <div class="card p-4">
+            <h5 class="fw-bold mb-3">Add New Class</h5>
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    {{ form.course_code.label(class="form-label") }}
+                    {{ form.course_code(class="form-control", placeholder="e.g. CSC101") }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.course_title.label(class="form-label") }}
+                    {{ form.course_title(class="form-control") }}
+                </div>
+
+                <!-- Day Dropdown -->
+                <div class="mb-3">
+                    <label class="form-label">Day</label>
+                    <div class="custom-dropdown" id="dayDropdown">
+                        <div class="custom-dropdown-selected" onclick="toggleDropdown('dayOptions')">
+                            <span id="selectedDayText">{{ form.day.data or 'Select Day' }}</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </div>
+                        <div class="custom-dropdown-options" id="dayOptions">
+                            <div class="custom-option" onclick="selectOption('Monday', 'selectedDayText', 'dayInput')">Monday</div>
+                            <div class="custom-option" onclick="selectOption('Tuesday', 'selectedDayText', 'dayInput')">Tuesday</div>
+                            <div class="custom-option" onclick="selectOption('Wednesday', 'selectedDayText', 'dayInput')">Wednesday</div>
+                            <div class="custom-option" onclick="selectOption('Thursday', 'selectedDayText', 'dayInput')">Thursday</div>
+                            <div class="custom-option" onclick="selectOption('Friday', 'selectedDayText', 'dayInput')">Friday</div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="day" id="dayInput" value="{{ form.day.data or '' }}">
+                </div>
+
+                <!-- Start Time -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Start Time</label>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <div class="custom-dropdown">
+                                <div class="custom-dropdown-selected" onclick="toggleDropdown('startHourOptions')">
+                                    <span id="selectedStartHour">{{ form.start_hour.data or 'Hour' }}</span>
+                                    <span class="dropdown-arrow">▼</span>
+                                </div>
+                                <div class="custom-dropdown-options" id="startHourOptions">
+                                    {% for h in range(1, 13) %}
+                                    <div class="custom-option" onclick="selectOption('{{ '%02d'|format(h) }}', 'selectedStartHour', 'startHourInput')">{{ '%02d'|format(h) }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <input type="hidden" name="start_hour" id="startHourInput" value="{{ form.start_hour.data or '' }}">
+                        </div>
+                        <div class="col-4">
+                            <div class="custom-dropdown">
+                                <div class="custom-dropdown-selected" onclick="toggleDropdown('startMinuteOptions')">
+                                    <span id="selectedStartMinute">{{ form.start_minute.data or 'Min' }}</span>
+                                    <span class="dropdown-arrow">▼</span>
+                                </div>
+                                <div class="custom-dropdown-options" id="startMinuteOptions">
+                                    <div class="custom-option" onclick="selectOption('00', 'selectedStartMinute', 'startMinuteInput')">00</div>
+                                    <div class="custom-option" onclick="selectOption('30', 'selectedStartMinute', 'startMinuteInput')">30</div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="start_minute" id="startMinuteInput" value="{{ form.start_minute.data or '' }}">
+                        </div>
+                        <div class="col-4">
+                            <div class="custom-dropdown">
+                                <div class="custom-dropdown-selected" onclick="toggleDropdown('startAmpmOptions')">
+                                    <span id="selectedStartAmpm">{{ form.start_ampm.data or 'AM/PM' }}</span>
+                                    <span class="dropdown-arrow">▼</span>
+                                </div>
+                                <div class="custom-dropdown-options" id="startAmpmOptions">
+                                    <div class="custom-option" onclick="selectOption('AM', 'selectedStartAmpm', 'startAmpmInput')">AM</div>
+                                    <div class="custom-option" onclick="selectOption('PM', 'selectedStartAmpm', 'startAmpmInput')">PM</div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="start_ampm" id="startAmpmInput" value="{{ form.start_ampm.data or '' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- End Time -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">End Time</label>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <div class="custom-dropdown">
+                                <div class="custom-dropdown-selected" onclick="toggleDropdown('endHourOptions')">
+                                    <span id="selectedEndHour">{{ form.end_hour.data or 'Hour' }}</span>
+                                    <span class="dropdown-arrow">▼</span>
+                                </div>
+                                <div class="custom-dropdown-options" id="endHourOptions">
+                                    {% for h in range(1, 13) %}
+                                    <div class="custom-option" onclick="selectOption('{{ '%02d'|format(h) }}', 'selectedEndHour', 'endHourInput')">{{ '%02d'|format(h) }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <input type="hidden" name="end_hour" id="endHourInput" value="{{ form.end_hour.data or '' }}">
+                        </div>
+                        <div class="col-4">
+                            <div class="custom-dropdown">
+                                <div class="custom-dropdown-selected" onclick="toggleDropdown('endMinuteOptions')">
+                                    <span id="selectedEndMinute">{{ form.end_minute.data or 'Min' }}</span>
+                                    <span class="dropdown-arrow">▼</span>
+                                </div>
+                                <div class="custom-dropdown-options" id="endMinuteOptions">
+                                    <div class="custom-option" onclick="selectOption('00', 'selectedEndMinute', 'endMinuteInput')">00</div>
+                                    <div class="custom-option" onclick="selectOption('30', 'selectedEndMinute', 'endMinuteInput')">30</div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="end_minute" id="endMinuteInput" value="{{ form.end_minute.data or '' }}">
+                        </div>
+                        <div class="col-4">
+                            <div class="custom-dropdown">
+                                <div class="custom-dropdown-selected" onclick="toggleDropdown('endAmpmOptions')">
+                                    <span id="selectedEndAmpm">{{ form.end_ampm.data or 'AM/PM' }}</span>
+                                    <span class="dropdown-arrow">▼</span>
+                                </div>
+                                <div class="custom-dropdown-options" id="endAmpmOptions">
+                                    <div class="custom-option" onclick="selectOption('AM', 'selectedEndAmpm', 'endAmpmInput')">AM</div>
+                                    <div class="custom-option" onclick="selectOption('PM', 'selectedEndAmpm', 'endAmpmInput')">PM</div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="end_ampm" id="endAmpmInput" value="{{ form.end_ampm.data or '' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form.venue.label(class="form-label") }}
+                    {{ form.venue(class="form-control") }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.lecturer.label(class="form-label") }}
+                    {{ form.lecturer(class="form-control") }}
+                </div>
+
+                {{ form.submit(class="btn btn-primary w-100") }}
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Your Classes -->
+    <div class="col-lg-{% if is_class_rep %}8{% else %}12{% endif %}">
+        <div class="card p-4">
+            <h5 class="fw-bold mb-3">Your Classes</h5>
+
+            {% if classes %}
+                <div class="row g-3">
+                    {% for class in classes %}
+                    <div class="col-md-6">
+                        <div class="card h-100 border shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">{{ class.course_code }}</h6>
+                                        <small class="text-muted">{{ class.course_title }}</small>
+                                    </div>
+                                    <div>
+                                        {% if class.assignment %}
+                                            {% if class.assignment.status == 'Assigned' %}
+                                                <span class="badge bg-primary">Assigned</span>
+                                            {% elif class.assignment.status == 'Present' %}
+                                                <span class="badge bg-success">Present</span>
+                                            {% elif class.assignment.status == 'Absent' %}
+                                                <span class="badge bg-danger">Absent</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ class.assignment.status }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <p class="mb-1"><strong>Day:</strong> {{ class.day }}</p>
+                                <p class="mb-1"><strong>Time:</strong> {{ class.time }}</p>
+                                <p class="mb-1"><strong>Venue:</strong> {{ class.venue }}</p>
+                                <p class="mb-1"><strong>Lecturer:</strong> {{ class.lecturer or '-' }}</p>
+                                <p class="mb-3">
+                                    <strong>Interpreter:</strong>
+                                    {% if class.assignment and class.assignment.interpreter %}
+                                        {{ class.assignment.interpreter.full_name }}
+                                    {% else %}
+                                        <span class="text-muted">Not assigned</span>
+                                    {% endif %}
+                                </p>
+
+                                {% if is_class_rep %}
+                                <div class="d-flex gap-2 flex-wrap">
+                                    {% if class.assignment and class.assignment.status == 'Assigned' %}
+                                        <a href="{{ url_for('mark_attendance', assignment_id=class.assignment.id, status='Present') }}"
+                                           class="btn btn-success btn-sm"
+                                           onclick="return confirm('Mark as Present?')">Present</a>
+                                        <a href="{{ url_for('mark_attendance', assignment_id=class.assignment.id, status='Absent') }}"
+                                           class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Mark as Absent?')">Absent</a>
+                                    {% endif %}
+                                    <a href="{{ url_for('delete_timetable', id=class.id) }}"
+                                       class="btn btn-outline-danger btn-sm"
+                                       onclick="return confirm('Delete this class?')">Delete</a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No classes added yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDropdown(optionsId) {
+    document.querySelectorAll('.custom-dropdown-options').forEach(el => {
+        if (el.id !== optionsId) el.style.display = 'none';
+    });
+    const options = document.getElementById(optionsId);
+    if (options) {
+        options.style.display = options.style.display === 'block' ? 'none' : 'block';
+    }
+}
+
+function selectOption(value, textId, inputId) {
+    document.getElementById(textId).innerText = value;
+    document.getElementById(inputId).value = value;
+    document.querySelectorAll('.custom-dropdown-options').forEach(el => el.style.display = 'none');
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.custom-dropdown')) {
+        document.querySelectorAll('.custom-dropdown-options').forEach(el => {
+            el.style.display = 'none';
+        });
+    }
+});
+</script>
+{% endblock %}

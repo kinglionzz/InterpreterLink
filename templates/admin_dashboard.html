@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="welcome-box">
+    <h2 class="mb-1">Admin Dashboard</h2>
+    <p class="text-muted mb-0">Welcome, <strong>{{ current_user.full_name }}</strong></p>
+</div>
+
+<div class="mb-4">
+    <a href="{{ url_for('admin_users') }}" class="btn btn-outline-dark me-2">
+    Manage Users
+    </a>
+    <a href="{{ url_for('generate_code', role='interpreter') }}" class="btn btn-info me-2">
+        Generate Interpreter Code
+    </a>
+    <a href="{{ url_for('generate_code', role='hoi') }}" class="btn btn-warning">
+        Generate HOI Code
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="mb-3">Registration Codes</h4>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for code in codes %}
+                    <tr>
+                        <td><strong>{{ code.code }}</strong></td>
+                        <td class="text-capitalize">{{ code.role }}</td>
+                        <td>
+                            {% if code.is_used %}
+                                <span class="badge bg-secondary">Used</span>
+                            {% else %}
+                                <span class="badge bg-success">Available</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ code.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            No codes generated yet
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

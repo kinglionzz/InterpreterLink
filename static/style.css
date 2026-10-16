@@ -1,0 +1,108 @@
+/* ===== General ===== */
+body {
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+    background: linear-gradient(90deg, #0d6efd, #0b5ed7) !important;
+    padding: 12px 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: 0.5px;
+}
+
+/* ===== Cards & Boxes ===== */
+.welcome-box {
+    background: white;
+    border-radius: 16px;
+    padding: 24px 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    margin-bottom: 24px;
+    border: 1px solid #e9ecef;
+}
+
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e9ecef;
+}
+
+/* ===== Buttons ===== */
+.btn {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 500;
+}
+
+.btn-info {
+    background-color: #0dcaf0;
+    border: none;
+    color: #000;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border: none;
+    color: #000;
+}
+
+/* ===== Table ===== */
+.table thead th {
+    background-color: #0d6efd !important;
+    color: white !important;
+    font-weight: 600;
+    border: none;
+}
+
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+/* ===== Links in navbar ===== */
+.navbar a {
+    text-decoration: none;
+}
+
+/* ========== STRONG FIX FOR DROPDOWNS ON MOBILE ========== */
+
+.form-select {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* When the dropdown is open on mobile */
+@media (max-width: 768px) {
+    select.form-select {
+        font-size: 16px !important; /* Important: prevents iOS zoom */
+        padding: 12px 14px;
+    }
+
+    /* Make the dropdown list not overflow */
+    select {
+        text-overflow: ellipsis;
+    }
+}
+
+/* Extra safety */
+.card .form-select {
+    max-width: 100%;
+}}
+
+.level-btn {
+    min-width: 70px;
+    border-radius: 8px;
+}

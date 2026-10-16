@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% set dept = current_user.department or '' %}
+{% set is_csc = 'Computer Science' in dept or (current_user.matric_number and current_user.matric_number.upper().startswith('CSC')) %}
+{% set is_edu = 'Special Education' in dept or (current_user.matric_number and current_user.matric_number.upper().startswith('EDU')) %}
+
+<div class="row g-4 {% if is_csc %}dashboard-csc{% elif is_edu %}dashboard-edu{% else %}dashboard-default{% endif %} p-3 rounded-4">
+
+    <!-- Profile Card -->
+    <div class="col-lg-3">
+        <div class="card p-4 text-center h-100
+            {% if is_csc %}top-border-csc
+            {% elif is_edu %}top-border-edu
+            {% else %}top-border-default{% endif %}">
+
+            {% if current_user.profile_picture %}
+                <img src="{{ url_for('static', filename='uploads/' + current_user.profile_picture) }}"
+                     class="profile-pic mx-auto mb-3" alt="Profile">
+            {% else %}
+                <div class="profile-pic mx-auto mb-3 d-flex align-items-center justify-content-center bg-light border">
+                    <span style="font-size: 2.8rem; color: #94a3b8;">👤</span>
+                </div>
+            {% endif %}
+
+            <h4 class="fw-bold mb-1">{{ current_user.full_name }}</h4>
+            <p class="text-muted mb-2">{{ current_user.matric_number or 'No Matric' }}</p>
+
+            <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
+                {% if current_user.level %}
+                    <span class="badge bg-dark">{{ current_user.level }}</span>
+                {% endif %}
+
+                {% if current_user.department_colour %}
+                    <span class="dept-badge" style="background-color: {{ current_user.department_colour }};">
+                        {{ current_user.department }}
+                    </span>
+                {% endif %}
+            </div>
+
+            <a href="{{ url_for('edit_profile') }}" class="btn btn-outline-primary btn-sm px-4">
+                Edit Profile
+            </a>
+        </div>
+    </div>
+
+    <!-- Right Side: Stats + Quick Actions -->
+    <div class="col-lg-9">
+
+        <!-- 4 Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ total_classes }}</div>
+                    <div class="stat-label">Total Classes</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ assigned_classes }}</div>
+                    <div class="stat-label">Interpreters Assigned</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ present_count }}</div>
+                    <div class="stat-label">Marked Present</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ complaints_count }}</div>
+                    <div class="stat-label">My Complaints</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions (Moved to top) -->
+        <div class="card p-4">
+            <h5 class="fw-bold mb-3">Quick Actions</h5>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('student_timetable') }}" class="btn btn-primary">
+                    Manage Timetable
+                </a>
+                <a href="{{ url_for('student_complaints') }}" class="btn btn-outline-danger">
+                    Submit Complaint
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

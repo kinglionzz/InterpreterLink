@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h3 class="text-center mb-4">HOI Registration</h3>
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.code.label(class="form-label") }}
+                        {{ form.code(class="form-control", placeholder="Enter code from Admin") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.full_name.label(class="form-label") }}
+                        {{ form.full_name(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        <div class="password-wrapper">
+                            {{ form.password(class="form-control", id="password") }}
+                            <button type="button" class="toggle-password" onclick="togglePassword('password', this)">
+                                Show
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form.confirm_password.label(class="form-label") }}
+                        <div class="password-wrapper">
+                            {{ form.confirm_password(class="form-control", id="confirmPassword") }}
+                            <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword', this)">
+                                Show
+                            </button>
+                        </div>
+                    </div>
+                    {{ form.submit(class="btn btn-warning w-100") }}
+                </form>
+                <p class="text-center mt-3">
+                    <a href="{{ url_for('login') }}">Already have an account? Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+        input.type = "text";
+        btn.innerText = "Hide";
+    } else {
+        input.type = "password";
+        btn.innerText = "Show";
+    }
+}
+</script>
+{% endblock %}

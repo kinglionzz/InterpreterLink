@@ -1,0 +1,313 @@
+:root {
+    --primary: #1E40AF;
+    --primary-dark: #1E3A8A;
+    --accent-yellow: #FBBF24;
+    --wine: #991B1B;
+    --bg: #F8FAFC;
+    --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+    --radius: 14px;
+}
+
+body {
+    background-color: var(--bg);
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    color: #1e293b;
+    min-height: 100vh;
+}
+
+/* ========== NAVBAR ========== */
+.navbar {
+    background-color: var(--primary) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+}
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: -0.4px;
+}
+
+/* ========== CARDS ========== */
+.card {
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+}
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+/* ========== PROFILE ========== */
+.profile-pic {
+    width: 95px;
+    height: 95px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #e2e8f0;
+}
+.dept-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+}
+
+/* ========== STAT CARDS ========== */
+.stat-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.4rem 1rem;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s;
+}
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+.stat-number {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.2;
+}
+.stat-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* ========== ROLE CARDS ========== */
+.role-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+.role-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border-color: var(--primary);
+}
+
+/* ========== DEPARTMENT THEME ========== */
+.dashboard-csc {
+    background-color: #FFFBEB !important;
+}
+.dashboard-edu {
+    background-color: #FEF2F2 !important;
+}
+.dashboard-default {
+    background-color: #F8FAFC !important;
+}
+.top-border-csc {
+    border-top: 5px solid #FBBF24 !important;
+}
+.top-border-edu {
+    border-top: 5px solid #991B1B !important;
+}
+.top-border-default {
+    border-top: 5px solid #1E40AF !important;
+}
+
+/* ========== AUTH PAGES + FULL SCREEN LOGO ========== */
+.auth-page {
+    position: relative;
+    min-height: 100vh;
+    background-color: #F8FAFC;
+    background-image: url('/static/WU_logo.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 70vw;          /* wide / almost full screen */
+    background-attachment: fixed;
+}
+
+.auth-card {
+    background: rgba(255, 255, 255, 0.93);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Cleaner form inputs */
+.form-control, .form-select {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    box-shadow: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #1E40AF;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.15);
+}
+
+/* Password toggle button */
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper .toggle-password {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 0.95rem;
+    padding: 0;
+}
+
+.password-wrapper .toggle-password:hover {
+    color: #1E40AF;
+}
+
+/* ========== MOBILE & TABLET IMPROVEMENTS ========== */
+
+@media (max-width: 768px) {
+    .profile-pic {
+        width: 80px;
+        height: 80px;
+    }
+
+    .stat-card {
+        padding: 1rem 0.5rem;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+
+    h3, h4, h5 {
+        font-size: 1.2rem;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+    }
+
+    /* Make action buttons stack better on mobile */
+    .btn-group-sm {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .btn-group-sm .btn {
+        border-radius: 6px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .stat-number {
+        font-size: 1.35rem;
+    }
+
+    .dept-badge {
+        font-size: 0.75rem;
+        padding: 3px 10px;
+    }
+}
+
+.level-btn {
+    min-width: 70px;
+    border-radius: 8px;
+}
+
+/* Custom Dropdown */
+.custom-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.custom-dropdown-selected {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+}
+
+.custom-dropdown-selected:hover {
+    border-color: #1E40AF;
+}
+
+.dropdown-arrow {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.custom-dropdown-options {
+    display: none;
+    position: absolute;
+    top: 110%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.custom-option {
+    padding: 12px 16px;
+    cursor: pointer;
+}
+
+.custom-option:hover {
+    background-color: #f1f5f9;
+    color: #1E40AF;
+}
+
+/* Sticky Footer Fix */
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    flex: 1 0 auto;
+}
+
+footer {
+    flex-shrink: 0;
+    margin-top: auto;
+}

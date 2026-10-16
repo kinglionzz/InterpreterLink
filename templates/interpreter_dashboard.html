@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card p-4 text-center h-100">
+            <div class="profile-pic mx-auto mb-3 d-flex align-items-center justify-content-center bg-light border">
+                <span style="font-size: 2.8rem; color: #94a3b8;">🤟</span>
+            </div>
+            <h4 class="fw-bold mb-1">{{ current_user.full_name }}</h4>
+            <p class="text-muted">Interpreter</p>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <div class="stat-number">{{ assignments|length if assignments is defined else 0 }}</div>
+                    <div class="stat-label">Total Assignments</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">This Week</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4">
+            <h5 class="fw-bold mb-3">Quick Actions</h5>
+            <a href="{{ url_for('interpreter_assignments') }}" class="btn btn-primary">
+                View My Assignments
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

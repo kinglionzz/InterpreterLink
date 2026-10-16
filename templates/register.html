@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="position-relative" style="min-height: 85vh;">
+
+    <!-- Natural Logo Watermark -->
+    <!-- Logo Watermark - Simple & Reliable -->
+<div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; display: flex; align-items: center; justify-content: center;">
+    <img src="{{ url_for('static', filename='WU_logo.png') }}"
+         alt="Logo"
+         style="width: 1250px;  opacity: 0.75;">
+</div>
+
+    <div class="position-relative" style="z-index: 1;">
+        <div class="text-center mb-5 pt-4">
+            <h2 class="fw-bold">Create an Account</h2>
+            <p class="text-muted">Choose your role to continue</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4">
+                <a href="{{ url_for('register_student') }}" class="text-decoration-none">
+                    <div class="card role-card h-100 text-center p-4">
+                        <div class="mb-3" style="font-size: 3rem;">🎓</div>
+                        <h4 class="fw-bold">I am a Student</h4>
+                        <p class="text-muted small">Class Representative / Deaf Student</p>
+                        <span class="btn btn-primary btn-sm mt-2 px-4">Register as Student</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="{{ url_for('register_interpreter') }}" class="text-decoration-none">
+                    <div class="card role-card h-100 text-center p-4">
+                        <div class="mb-3" style="font-size: 3rem;">🤟</div>
+                        <h4 class="fw-bold">I am an Interpreter</h4>
+                        <p class="text-muted small">Requires registration code from Admin</p>
+                        <span class="btn btn-primary btn-sm mt-2 px-4">Register as Interpreter</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="{{ url_for('register_hoi') }}" class="text-decoration-none">
+                    <div class="card role-card h-100 text-center p-4">
+                        <div class="mb-3" style="font-size: 3rem;">📋</div>
+                        <h4 class="fw-bold">I am HOI</h4>
+                        <p class="text-muted small">Head of Interpreters – requires code</p>
+                        <span class="btn btn-primary btn-sm mt-2 px-4">Register as HOI</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <p class="text-center mt-5">
+            Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
