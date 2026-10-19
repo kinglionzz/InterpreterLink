@@ -155,23 +155,42 @@ def index():
 
 @app.route('/register/student', methods=['GET', 'POST'])
 def register_student():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-
     form = StudentRegisterForm()
+
     if form.validate_on_submit():
+        # Check if email already exists
+        existing_user = User.query.filter_by(email=form.email.data.lower().strip()).first()
+        if existing_user:
+            flash('Email already registered. Please login or use a different email.', 'danger')
+            return redirect(url_for('register_student'))
+
+        # Check if matric already exists
+        if form.matric_number.data:
+            existing_matric = User.query.filter_by(matric_number=form.matric_number.data.strip()).first()
+            if existing_matric:
+                flash('Matric number already registered.', 'danger')
+                return redirect(url_for('register_student'))
+
+        # Check password match
+        if form.password.data != form.confirm_password.data:
+            flash('Passwords do not match.', 'danger')
+            return redirect(url_for('register_student'))
+
+        # Create student
         department, colour = detect_department(form.matric_number.data)
 
-        user = User(
-            email=form.email.data.lower(),
-            full_name=form.full_name.data,
+        student = User(
+            email=form.email.data.lower().strip(),
+            full_name=form.full_name.data.strip(),
             role='student',
-            matric_number=form.matric_number.data.upper(),
+            matric_number=form.matric_number.data.strip().upper(),
             department=department,
-            department_colour=colour
+            department_colour=colour,
+            level=form.level.data
         )
-        user.set_password(form.password.data)
-        db.session.add(user)
+        student.set_password(form.password.data)
+
+        db.session.add(student)
         db.session.commit()
 
         flash('Registration successful! Please login.', 'success')
@@ -182,31 +201,44 @@ def register_student():
 
 @app.route('/register/interpreter', methods=['GET', 'POST'])
 def register_interpreter():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-
     form = InterpreterRegisterForm()
+
     if form.validate_on_submit():
-        code = RegistrationCode.query.filter_by(code=form.code.data.upper(), role='interpreter', is_used=False).first()
+        # Check email
+        existing_user = User.query.filter_by(email=form.email.data.lower().strip()).first()
+        if existing_user:
+            flash('Email already registered. Please login or use a different email.', 'danger')
+            return redirect(url_for('register_interpreter'))
+
+        # Check password match
+        if form.password.data != form.confirm_password.data:
+            flash('Passwords do not match.', 'danger')
+            return redirect(url_for('register_interpreter'))
+
+        # Check registration code
+        code = RegistrationCode.query.filter_by(
+            code=form.registration_code.data.strip().upper(),
+            role='interpreter',
+            is_used=False
+        ).first()
+
         if not code:
             flash('Invalid or already used registration code.', 'danger')
-            return render_template('register_interpreter.html', form=form)
+            return redirect(url_for('register_interpreter'))
 
-        user = User(
-            email=form.email.data.lower(),
-            full_name=form.full_name.data,
+        # Create interpreter
+        interpreter = User(
+            email=form.email.data.lower().strip(),
+            full_name=form.full_name.data.strip(),
             role='interpreter'
         )
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.flush()  # get user.id
+        interpreter.set_password(form.password.data)
 
         code.is_used = True
-        code.used_at = datetime.utcnow()
-        code.used_by = user.id
+        db.session.add(interpreter)
         db.session.commit()
 
-        flash('Interpreter registration successful! Please login.', 'success')
+        flash('Registration successful! Please login.', 'success')
         return redirect(url_for('login'))
 
     return render_template('register_interpreter.html', form=form)
@@ -251,13 +283,22 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data.lower()).first()
+        user = User.query.filter_by(email=form.email.data.lower().strip()).first()
+
         if user and user.check_password(form.password.data):
             login_user(user)
             flash(f'Welcome back, {user.full_name}!', 'success')
-            return redirect(url_for('index'))
+
+            if user.role == 'admin':
+                return redirect(url_for('admin_dashboard'))
+            elif user.role == 'hoi':
+                return redirect(url_for('hoi_dashboard'))
+            elif user.role == 'interpreter':
+                return redirect(url_for('interpreter_dashboard'))
+            else:
+                return redirect(url_for('student_dashboard'))
         else:
-            flash('Wrong email or password.', 'danger')
+            flash('Invalid email or password. Please try again.', 'danger')
 
     return render_template('login.html', form=form)
 
