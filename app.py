@@ -571,11 +571,18 @@ import os
 @app.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
+    if current_user.role not in ['student', 'interpreter']:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('index'))
+
     form = EditProfileForm()
 
     if form.validate_on_submit():
         current_user.full_name = form.full_name.data
-        current_user.level = form.level.data
+
+        # Only students have level
+        if current_user.role == 'student':
+            current_user.level = form.level.data
 
         if form.profile_picture.data:
             picture = form.profile_picture.data
@@ -590,10 +597,15 @@ def edit_profile():
 
         db.session.commit()
         flash('Profile updated successfully!', 'success')
-        return redirect(url_for('student_dashboard'))
+
+        if current_user.role == 'student':
+            return redirect(url_for('student_dashboard'))
+        else:
+            return redirect(url_for('interpreter_dashboard'))
 
     form.full_name.data = current_user.full_name
-    form.level.data = current_user.level
+    if current_user.role == 'student':
+        form.level.data = current_user.level
 
     return render_template('edit_profile.html', form=form)
 
@@ -721,21 +733,21 @@ def hoi_reassign(timetable_id):
     )
 
 # ========== CREATE TABLES + FIRST ADMIN ==========
+with app.app_context():
+    db.create_all()
+
+    # Create first Admin if none exists
+    admin = User.query.filter_by(role='admin').first()
+    if not admin:
+        admin = User(
+            email='admin@interpreterlink.com',
+            full_name='System Admin',
+            role='admin'
+        )
+        admin.set_password('admin123')
+        db.session.add(admin)
+        db.session.commit()
+        print("Admin created → Email: admin@interpreterlink.com | Password: admin123")
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-
-        # Create first Admin if none exists
-        admin = User.query.filter_by(role='admin').first()
-        if not admin:
-            admin = User(
-                email='admin@interpreterlink.com',
-                full_name='System Admin',
-                role='admin'
-            )
-            admin.set_password('admin123')  # Change this password later!
-            db.session.add(admin)
-            db.session.commit()
-            print("Admin created → Email: admin@interpreterlink.com | Password: admin123")
-
     app.run(debug=True)
