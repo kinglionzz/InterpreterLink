@@ -24,12 +24,12 @@ class StudentRegisterForm(FlaskForm):
 
 
 class InterpreterRegisterForm(FlaskForm):
-    full_name = StringField('Full Name', validators=[DataRequired()])
+    full_name = StringField('Full Name', validators=[DataRequired(), Length(min=2, max=100)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     code = StringField('Registration Code', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired()])
-    submit = SubmitField('Register')
+    submit = SubmitField('Register as Interpreter')
 
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
@@ -38,12 +38,12 @@ class InterpreterRegisterForm(FlaskForm):
 
 
 class HOIRegisterForm(FlaskForm):
-    full_name = StringField('Full Name', validators=[DataRequired()])
+    full_name = StringField('Full Name', validators=[DataRequired(), Length(min=2, max=100)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    registration_code = StringField('Registration Code', validators=[DataRequired()])
+    code = StringField('Registration Code', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired()])
-    submit = SubmitField('Register')
+    submit = SubmitField('Register as HOI')
 
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
