@@ -158,38 +158,36 @@ def register_student():
     form = StudentRegisterForm()
 
     if form.validate_on_submit():
-        # Check if email already exists
-        existing_user = User.query.filter_by(email=form.email.data.lower().strip()).first()
-        if existing_user:
-            flash('Email already registered. Please login or use a different email.', 'danger')
+        email = form.email.data.lower().strip()
+        matric = form.matric_number.data.strip().upper() if form.matric_number.data else None
+
+        # Check email already used
+        if User.query.filter_by(email=email).first():
+            flash('Email already registered. Please login.', 'danger')
             return redirect(url_for('register_student'))
 
-        # Check if matric already exists
-        if form.matric_number.data:
-            existing_matric = User.query.filter_by(matric_number=form.matric_number.data.strip()).first()
-            if existing_matric:
-                flash('Matric number already registered.', 'danger')
-                return redirect(url_for('register_student'))
+        # Check matric already used
+        if matric and User.query.filter_by(matric_number=matric).first():
+            flash('Matric number already registered.', 'danger')
+            return redirect(url_for('register_student'))
 
-        # Check password match
+        # Check passwords match
         if form.password.data != form.confirm_password.data:
             flash('Passwords do not match.', 'danger')
             return redirect(url_for('register_student'))
 
-        # Create student
-        department, colour = detect_department(form.matric_number.data)
+        department, colour = detect_department(matric)
 
         student = User(
-            email=form.email.data.lower().strip(),
+            email=email,
             full_name=form.full_name.data.strip(),
             role='student',
-            matric_number=form.matric_number.data.strip().upper(),
+            matric_number=matric,
             department=department,
             department_colour=colour,
             level=form.level.data
         )
         student.set_password(form.password.data)
-
         db.session.add(student)
         db.session.commit()
 
@@ -204,18 +202,16 @@ def register_interpreter():
     form = InterpreterRegisterForm()
 
     if form.validate_on_submit():
-        # Check email
-        existing_user = User.query.filter_by(email=form.email.data.lower().strip()).first()
-        if existing_user:
-            flash('Email already registered. Please login or use a different email.', 'danger')
+        email = form.email.data.lower().strip()
+
+        if User.query.filter_by(email=email).first():
+            flash('Email already registered. Please login.', 'danger')
             return redirect(url_for('register_interpreter'))
 
-        # Check password match
         if form.password.data != form.confirm_password.data:
             flash('Passwords do not match.', 'danger')
             return redirect(url_for('register_interpreter'))
 
-        # Check registration code
         code = RegistrationCode.query.filter_by(
             code=form.registration_code.data.strip().upper(),
             role='interpreter',
@@ -226,9 +222,8 @@ def register_interpreter():
             flash('Invalid or already used registration code.', 'danger')
             return redirect(url_for('register_interpreter'))
 
-        # Create interpreter
         interpreter = User(
-            email=form.email.data.lower().strip(),
+            email=email,
             full_name=form.full_name.data.strip(),
             role='interpreter'
         )
@@ -246,31 +241,41 @@ def register_interpreter():
 
 @app.route('/register/hoi', methods=['GET', 'POST'])
 def register_hoi():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-
     form = HOIRegisterForm()
+
     if form.validate_on_submit():
-        code = RegistrationCode.query.filter_by(code=form.code.data.upper(), role='hoi', is_used=False).first()
+        email = form.email.data.lower().strip()
+
+        if User.query.filter_by(email=email).first():
+            flash('Email already registered. Please login.', 'danger')
+            return redirect(url_for('register_hoi'))
+
+        if form.password.data != form.confirm_password.data:
+            flash('Passwords do not match.', 'danger')
+            return redirect(url_for('register_hoi'))
+
+        code = RegistrationCode.query.filter_by(
+            code=form.registration_code.data.strip().upper(),
+            role='hoi',
+            is_used=False
+        ).first()
+
         if not code:
             flash('Invalid or already used registration code.', 'danger')
-            return render_template('register_hoi.html', form=form)
+            return redirect(url_for('register_hoi'))
 
-        user = User(
-            email=form.email.data.lower(),
-            full_name=form.full_name.data,
+        hoi = User(
+            email=email,
+            full_name=form.full_name.data.strip(),
             role='hoi'
         )
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.flush()
+        hoi.set_password(form.password.data)
 
         code.is_used = True
-        code.used_at = datetime.utcnow()
-        code.used_by = user.id
+        db.session.add(hoi)
         db.session.commit()
 
-        flash('HOI registration successful! Please login.', 'success')
+        flash('Registration successful! Please login.', 'success')
         return redirect(url_for('login'))
 
     return render_template('register_hoi.html', form=form)
@@ -298,7 +303,7 @@ def login():
             else:
                 return redirect(url_for('student_dashboard'))
         else:
-            flash('Invalid email or password. Please try again.', 'danger')
+            flash('Invalid email or password.', 'danger')
 
     return render_template('login.html', form=form)
 
