@@ -213,7 +213,7 @@ def register_interpreter():
             return redirect(url_for('register_interpreter'))
 
         code = RegistrationCode.query.filter_by(
-            code=form.registration_code.data.strip().upper(),
+            code=form.code.data.strip().upper(),
             role='interpreter',
             is_used=False
         ).first()
@@ -255,7 +255,7 @@ def register_hoi():
             return redirect(url_for('register_hoi'))
 
         code = RegistrationCode.query.filter_by(
-            code=form.registration_code.data.strip().upper(),
+            code=form.code.data.strip().upper(),
             role='hoi',
             is_used=False
         ).first()
