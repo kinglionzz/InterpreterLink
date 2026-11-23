@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -5,44 +6,82 @@
     <div class="col-md-6">
         <div class="card shadow">
             <div class="card-body p-4">
+
                 <h3 class="text-center mb-4">Student Registration</h3>
+
                 <form method="POST">
                     {{ form.hidden_tag() }}
+
                     <div class="mb-3">
                         {{ form.matric_number.label(class="form-label") }}
                         {{ form.matric_number(class="form-control", placeholder="e.g. CSC/2023/001") }}
+                        {% for error in form.matric_number.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
                     </div>
+
                     <div class="mb-3">
                         {{ form.full_name.label(class="form-label") }}
                         {{ form.full_name(class="form-control") }}
+                        {% for error in form.full_name.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
                     </div>
+
                     <div class="mb-3">
                         {{ form.email.label(class="form-label") }}
                         {{ form.email(class="form-control") }}
+                        {% for error in form.email.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
                     </div>
+
+                    <div class="mb-3">
+                        {{ form.level.label(class="form-label") }}
+                        {{ form.level(class="form-select") }}
+                        {% for error in form.level.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+
                     <div class="mb-3">
                         {{ form.password.label(class="form-label") }}
                         <div class="password-wrapper">
                             {{ form.password(class="form-control", id="password") }}
-                            <button type="button" class="toggle-password" onclick="togglePassword('password', this)">
+                            <button type="button" class="toggle-password"
+                                onclick="togglePassword('password', this)">
                                 Show
                             </button>
                         </div>
+                        {% for error in form.password.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
                     </div>
+
                     <div class="mb-3">
                         {{ form.confirm_password.label(class="form-label") }}
                         <div class="password-wrapper">
                             {{ form.confirm_password(class="form-control", id="confirmPassword") }}
-                            <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword', this)">
+                            <button type="button" class="toggle-password"
+                                onclick="togglePassword('confirmPassword', this)">
                                 Show
                             </button>
                         </div>
+                        {% for error in form.confirm_password.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
                     </div>
+
                     {{ form.submit(class="btn btn-success w-100") }}
+
                 </form>
+
                 <p class="text-center mt-3">
-                    <a href="{{ url_for('login') }}">Already have an account? Login</a>
+                    <a href="{{ url_for('login') }}">
+                        Already have an account? Login
+                    </a>
                 </p>
+
             </div>
         </div>
     </div>
@@ -51,6 +90,7 @@
 <script>
 function togglePassword(inputId, btn) {
     const input = document.getElementById(inputId);
+
     if (input.type === "password") {
         input.type = "text";
         btn.innerText = "Hide";

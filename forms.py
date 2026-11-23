@@ -4,12 +4,46 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationE
 from models import User, RegistrationCode
 from wtforms import TextAreaField
 
+
 class StudentRegisterForm(FlaskForm):
-    matric_number = StringField('Matric Number', validators=[DataRequired(), Length(min=5, max=30)])
-    full_name = StringField('Full Name', validators=[DataRequired(), Length(min=3, max=100)])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    matric_number = StringField(
+        'Matric Number',
+        validators=[DataRequired(), Length(min=5, max=30)]
+    )
+
+    full_name = StringField(
+        'Full Name',
+        validators=[DataRequired(), Length(min=3, max=100)]
+    )
+
+    email = StringField(
+        'Email',
+        validators=[DataRequired(), Email()]
+    )
+
+    level = SelectField(
+        'Academic Level',
+        choices=[
+            ('', 'Select Your Level'),
+            ('100L', '100 Level'),
+            ('200L', '200 Level'),
+            ('300L', '300 Level'),
+            ('400L', '400 Level'),
+            ('500L', '500 Level')
+        ],
+        validators=[DataRequired(message='Please select your academic level.')]
+    )
+
+    password = PasswordField(
+        'Password',
+        validators=[DataRequired(), Length(min=6)]
+    )
+
+    confirm_password = PasswordField(
+        'Confirm Password',
+        validators=[DataRequired(), EqualTo('password')]
+    )
+
     submit = SubmitField('Register as Student')
 
     def validate_email(self, email):
@@ -21,6 +55,7 @@ class StudentRegisterForm(FlaskForm):
         user = User.query.filter_by(matric_number=matric_number.data).first()
         if user:
             raise ValidationError('Matric number already registered.')
+
 
 
 class InterpreterRegisterForm(FlaskForm):
