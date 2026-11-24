@@ -90,19 +90,38 @@ class Assignment(db.Model):
     __tablename__ = 'assignments'
 
     id = db.Column(db.Integer, primary_key=True)
-    timetable_id = db.Column(db.Integer, db.ForeignKey('timetables.id'), nullable=False)
-    interpreter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    timetable_id = db.Column(
+        db.Integer,
+        db.ForeignKey('timetables.id'),
+        nullable=False
+    )
+    interpreter_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        nullable=True
+    )
 
+    # Interpreter assignment status
     status = db.Column(db.String(20), default='Pending')
-    # Possible values: Pending, Assigned, Present, Absent
+
+    # Attendance status
+    attendance_status = db.Column(
+        db.String(30),
+        default='Not Yet Confirmed'
+    )
 
     assigned_at = db.Column(db.DateTime, nullable=True)
-    marked_by_student = db.Column(db.String(20), nullable=True)  # Present / Absent
+
+    # Attendance information
+    marked_by_student = db.Column(db.String(20), nullable=True)
     marked_by_interpreter = db.Column(db.String(20), nullable=True)
     marked_at = db.Column(db.DateTime, nullable=True)
 
     # Relationships
-    timetable = db.relationship('Timetable', backref=db.backref('assignment', uselist=False))
+    timetable = db.relationship(
+        'Timetable',
+        backref=db.backref('assignment', uselist=False)
+    )
     interpreter = db.relationship('User', backref='assignments')
 
     def __repr__(self):

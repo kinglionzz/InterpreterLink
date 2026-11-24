@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -14,12 +15,32 @@
                     {{ form.full_name(class="form-control") }}
                 </div>
 
+                {% if current_user.role == 'student' %}
+
+                <div class="mb-3">
+                    {{ form.matric_number.label(class="form-label") }}
+                    {{ form.matric_number(class="form-control", placeholder="Enter matric number (optional)") }}
+                    <small class="text-muted">
+                        Leave empty if you do not have a matric number yet.
+                    </small>
+                </div>
+
+                <div class="mb-3">
+                    {{ form.department.label(class="form-label") }}
+                    {{ form.department(class="form-select") }}
+                    <small class="text-muted">
+                        Your department will be detected automatically from a recognised matric number.
+                    </small>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Level</label>
 
                     <div class="custom-dropdown" id="levelDropdown">
                         <div class="custom-dropdown-selected" onclick="toggleDropdown()">
-                            <span id="selectedLevelText">{{ form.level.data or 'Select Level' }}</span>
+                            <span id="selectedLevelText">
+                                {{ form.level.data or 'Select Level' }}
+                            </span>
                             <span class="dropdown-arrow">▼</span>
                         </div>
 
@@ -28,12 +49,16 @@
                             <div class="custom-option" onclick="selectLevelOption('200L')">200L</div>
                             <div class="custom-option" onclick="selectLevelOption('300L')">300L</div>
                             <div class="custom-option" onclick="selectLevelOption('400L')">400L</div>
+                            <div class="custom-option" onclick="selectLevelOption('500L')">500L</div>
+                            <div class="custom-option" onclick="selectLevelOption('600L')">600L</div>
                         </div>
                     </div>
 
-                    <!-- This is what actually gets submitted -->
-                    <input type="hidden" name="level" id="levelInput" value="{{ form.level.data or '' }}">
+                    <input type="hidden" name="level" id="levelInput"
+                           value="{{ form.level.data or '' }}">
                 </div>
+
+                {% endif %}
 
                 <div class="mb-4">
                     {{ form.profile_picture.label(class="form-label") }}
@@ -43,7 +68,14 @@
 
                 <div class="d-grid gap-2">
                     {{ form.submit(class="btn btn-primary") }}
-                    <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+
+                    {% if current_user.role == 'student' %}
+                        <a href="{{ url_for('student_dashboard') }}"
+                           class="btn btn-outline-secondary">Cancel</a>
+                    {% else %}
+                        <a href="{{ url_for('interpreter_dashboard') }}"
+                           class="btn btn-outline-secondary">Cancel</a>
+                    {% endif %}
                 </div>
             </form>
         </div>
@@ -51,26 +83,10 @@
 </div>
 
 <script>
-function selectLevel(button, level) {
-    // Remove active style from all buttons
-    document.querySelectorAll('.level-btn').forEach(btn => {
-        btn.classList.remove('btn-primary');
-        btn.classList.add('btn-outline-primary');
-    });
-
-    // Add active style to clicked button
-    button.classList.remove('btn-outline-primary');
-    button.classList.add('btn-primary');
-
-    // Set the hidden input value
-    document.getElementById('levelInput').value = level;
-}
-</script>
-
-<script>
 function toggleDropdown() {
     const options = document.getElementById('levelOptions');
-    options.style.display = options.style.display === 'block' ? 'none' : 'block';
+    options.style.display =
+        options.style.display === 'block' ? 'none' : 'block';
 }
 
 function selectLevelOption(level) {
@@ -79,9 +95,9 @@ function selectLevelOption(level) {
     document.getElementById('levelOptions').style.display = 'none';
 }
 
-// Close dropdown when clicking outside
 document.addEventListener('click', function(e) {
     const dropdown = document.getElementById('levelDropdown');
+
     if (dropdown && !dropdown.contains(e.target)) {
         document.getElementById('levelOptions').style.display = 'none';
     }

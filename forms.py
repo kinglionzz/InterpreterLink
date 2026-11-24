@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, FileField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
+from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional
 from models import User, RegistrationCode
 from wtforms import TextAreaField
 
@@ -8,7 +8,7 @@ from wtforms import TextAreaField
 class StudentRegisterForm(FlaskForm):
     matric_number = StringField(
         'Matric Number',
-        validators=[DataRequired(), Length(min=5, max=30)]
+        validators=[Optional(), Length(min=5, max=30)]
     )
 
     full_name = StringField(
@@ -29,7 +29,8 @@ class StudentRegisterForm(FlaskForm):
             ('200L', '200 Level'),
             ('300L', '300 Level'),
             ('400L', '400 Level'),
-            ('500L', '500 Level')
+            ('500L', '500 Level'),
+            ('600L', '600 Level')
         ],
         validators=[DataRequired(message='Please select your academic level.')]
     )
@@ -52,6 +53,8 @@ class StudentRegisterForm(FlaskForm):
             raise ValidationError('Email already registered.')
 
     def validate_matric_number(self, matric_number):
+        if matric_number.data:
+            matric = matric_number.data.strip().upper()
         user = User.query.filter_by(matric_number=matric_number.data).first()
         if user:
             raise ValidationError('Matric number already registered.')
@@ -94,24 +97,62 @@ class LoginForm(FlaskForm):
 
 class ProfileForm(FlaskForm):
     full_name = StringField('Full Name', validators=[DataRequired()])
-    level = SelectField('Level', choices=[('100L', '100L'), ('200L', '200L'), ('300L', '300L'), ('400L', '400L')])
+    level = SelectField('Level', choices=[('100L', '100L'), ('200L', '200L'), ('300L', '300L'), ('400L', '400L'), ('500L', '500L'), ('600L', '600L')])
     department = StringField('Department')
     profile_picture = FileField('Profile Picture')
     submit = SubmitField('Update Profile')
 
 
+
 class EditProfileForm(FlaskForm):
-    full_name = StringField('Full Name', validators=[DataRequired(), Length(min=3, max=100)])
-    level = SelectField('Level', choices=[
-        ('', 'Select Level'),
-        ('100L', '100L'),
-        ('200L', '200L'),
-        ('300L', '300L'),
-        ('400L', '400L'),
-        ('500L', '500L')
-    ], validators=[DataRequired()])
+    full_name = StringField(
+        'Full Name',
+        validators=[DataRequired(), Length(min=3, max=100)]
+    )
+
+    matric_number = StringField(
+        'Matric Number',
+        validators=[Optional(), Length(min=5, max=30)]
+    )
+
+    department = SelectField(
+        'Department',
+        choices=[
+            ('', 'Select Department'),
+            ('Computer Science', 'Computer Science'),
+            ('Special Education', 'Special Education'),
+            ('Business Administration', 'Business Administration'),
+            ('Political Science', 'Political Science'),
+            ('Economic', 'Economic'),
+            ('Mass Communication', 'Mass Communication'),
+            ('Health Community', 'Health Community'),
+            ('Nutrition and Dietetics', 'Nutrition and Dietetics'),
+            ('Public Administration', 'Public Administration'),
+            ('Law', 'Law'),
+            ('International Relations and Diplomacy', 'International Relations and Diplomacy'),
+            ('Public Health', 'Public Health')
+        ],
+        validators=[Optional()]
+    )
+
+    level = SelectField(
+        'Level',
+        choices=[
+            ('', 'Select Level'),
+            ('100L', '100L'),
+            ('200L', '200L'),
+            ('300L', '300L'),
+            ('400L', '400L'),
+            ('500L', '500L'),
+            ('600L', '600L')
+        ],
+        validators=[DataRequired()]
+    )
+
     profile_picture = FileField('Profile Picture')
+
     submit = SubmitField('Save Changes')
+
 
 
 class TimetableForm(FlaskForm):

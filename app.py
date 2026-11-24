@@ -122,19 +122,35 @@ def student_complaints():
 
 # ========== HELPER: Detect Department & Colour from Matric ==========
 def detect_department(matric):
-    matric = matric.upper()
+    if not matric:
+        return 'Pending', '#FFD700'
     if matric.startswith('CSC') or 'CSC' in matric:
-        return 'Computer Science', '#FFD700'      # Yellow
-    elif matric.startswith('EDU') or 'EDU' in matric:
+        return 'Computer Science', '#FFFDD0'      # Yellow
+    elif matric.startswith('SPE') or 'SPE' in matric:
         return 'Special Education', '#722F37'     # Wine
     elif matric.startswith('BUS') or 'BUS' in matric:
-        return 'Business Administration', '#000080'
+        return 'Business Administration', '#000080' #navy
     elif matric.startswith('POL') or 'POL' in matric:
-        return 'Political Science', '#000080'
-    elif matric.startswith('ENG') or 'ENG' in matric:
-        return 'Engineering', '#32CD32'
+        return 'Political Science', '#000080'       #navy
+    elif matric.startswith('ECO') or 'ECO' in matric:
+        return 'Economic', '#000080'                #navy
+    elif matric.startswith('MSS') or 'MSS' in matric:
+        return 'Mass Communication', '#000080'      #navy
+    elif matric.startswith('CHS') or 'CHS' in matric:
+        return 'Health Community', '#808080'
+    elif matric.startswith('NUD') or 'NUD' in matric:
+        return 'Nutrition and Dietetics', '#008000'
+    elif matric.startswith('PAD') or 'PAD' in matric:
+        return 'Public Administration', '#000080'
+    elif matric.startswith('LAW') or 'LAW' in matric:
+        return 'Law', '#000000'
+    elif matric.startswith('IRD') or 'IRD' in matric:
+        return 'International Relations and Diplomacy ', '#000080'
+    elif matric.startswith('PBH') or 'PHB' in matric:
+        return 'Public Health', '#B2BEB5'
+
     else:
-        return 'General', '#808080'               # Grey
+        return 'General', '#FFD700'               # Gold
 
 
 # ========== ROUTES ==========
@@ -358,30 +374,47 @@ def admin_delete_user(user_id):
     flash(f'User "{user.full_name}" has been deleted.', 'success')
     return redirect(url_for('admin_users'))
 
-@app.route('/student/mark/<int:assignment_id>/<status>')
+@app.route('/student/mark-attendance/<int:assignment_id>/<status>')
 @login_required
-def student_mark_attendance(assignment_id, status):
-    if current_user.role != 'student':
-        flash('Access denied.', 'danger')
-        return redirect(url_for('index'))
+def mark_attendance(assignment_id, status):
 
-    if status not in ['Present', 'Absent']:
-        flash('Invalid status.', 'danger')
+    if current_user.role != 'student' or not current_user.is_class_rep:
+        flash('Only the Class Representative can mark attendance.', 'danger')
+        return redirect(url_for('student_timetable'))
+
+    allowed_statuses = [
+        'Present',
+        'Absent',
+        'Class Cancelled',
+        'Interpreter Replaced',
+        'Lecturer Absent'
+    ]
+
+    if status not in allowed_statuses:
+        flash('Invalid attendance status.', 'danger')
         return redirect(url_for('student_timetable'))
 
     assignment = Assignment.query.get_or_404(assignment_id)
 
-    # Security check: only the student who owns the class can mark it
-    if assignment.timetable.student_id != current_user.id:
-        flash('You cannot mark this assignment.', 'danger')
+    # Check the Class Rep's department and level
+    if (
+        assignment.timetable.department != current_user.department or
+        assignment.timetable.level != current_user.level
+    ):
+        flash('You cannot mark attendance for this class.', 'danger')
         return redirect(url_for('student_timetable'))
 
+    if not assignment.interpreter_id:
+        flash('No interpreter is assigned to this class.', 'warning')
+        return redirect(url_for('student_timetable'))
+
+    assignment.attendance_status = status
     assignment.marked_by_student = status
-    assignment.status = status
     assignment.marked_at = datetime.utcnow()
+
     db.session.commit()
 
-    flash(f'Interpreter marked as {status}.', 'success')
+    flash(f'Attendance recorded as {status}.', 'success')
     return redirect(url_for('student_timetable'))
 
 @app.route('/admin/toggle-class-rep/<int:user_id>')
@@ -404,32 +437,6 @@ def toggle_class_rep(user_id):
     flash(f'{user.full_name} is {status}.', 'success')
     return redirect(url_for('admin_users'))
 
-@app.route('/student/mark-attendance/<int:assignment_id>/<status>')
-@login_required
-def mark_attendance(assignment_id, status):
-    if current_user.role != 'student' or not current_user.is_class_rep:
-        flash('Only the Class Representative can mark attendance.', 'danger')
-        return redirect(url_for('student_timetable'))
-
-    if status not in ['Present', 'Absent']:
-        flash('Invalid status.', 'danger')
-        return redirect(url_for('student_timetable'))
-
-    assignment = Assignment.query.get_or_404(assignment_id)
-
-    # Security check: make sure this class belongs to the Class Rep's department & level
-    if (assignment.timetable.department != current_user.department or
-        assignment.timetable.level != current_user.level):
-        flash('You cannot mark this class.', 'danger')
-        return redirect(url_for('student_timetable'))
-
-    assignment.status = status
-    assignment.marked_by_student = status
-    assignment.marked_at = datetime.utcnow()
-    db.session.commit()
-
-    flash(f'Interpreter marked as {status}.', 'success')
-    return redirect(url_for('student_timetable'))
 
 @app.route('/hoi/dashboard')
 @login_required
@@ -614,6 +621,7 @@ def register():
 from werkzeug.utils import secure_filename
 import os
 
+
 @app.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
@@ -624,10 +632,58 @@ def edit_profile():
     form = EditProfileForm()
 
     if form.validate_on_submit():
-        current_user.full_name = form.full_name.data
+        current_user.full_name = form.full_name.data.strip()
 
-        # Only students have level
         if current_user.role == 'student':
+            matric = (
+                form.matric_number.data.strip().upper()
+                if form.matric_number.data else None
+            )
+
+            department = form.department.data
+
+            # Check whether another student already uses this matric number
+            if matric:
+                existing = User.query.filter(
+                    User.matric_number == matric,
+                    User.id != current_user.id
+                ).first()
+
+                if existing:
+                    flash('This matric number is already registered.', 'danger')
+                    return render_template('edit_profile.html', form=form)
+
+                detected_department, detected_colour = detect_department(matric)
+
+                # A recognised matric number must match the selected department
+                if detected_department not in ['Pending', 'General']:
+                    if department and department != detected_department:
+                        flash(
+                            'The selected department does not match your matric number.',
+                            'danger'
+                        )
+                        return render_template('edit_profile.html', form=form)
+
+                    current_user.department = detected_department
+                    current_user.department_colour = detected_colour
+
+                else:
+                    flash(
+                        'Your matric number prefix is not recognised. Please check it.',
+                        'danger'
+                    )
+                    return render_template('edit_profile.html', form=form)
+
+            else:
+                # Students without matric numbers must select a department
+                if not department:
+                    flash('Please select your department.', 'danger')
+                    return render_template('edit_profile.html', form=form)
+
+                current_user.department = department
+                current_user.department_colour = None
+
+            current_user.matric_number = matric
             current_user.level = form.level.data
 
         if form.profile_picture.data:
@@ -642,18 +698,24 @@ def edit_profile():
             current_user.profile_picture = unique_name
 
         db.session.commit()
+
         flash('Profile updated successfully!', 'success')
 
         if current_user.role == 'student':
             return redirect(url_for('student_dashboard'))
-        else:
-            return redirect(url_for('interpreter_dashboard'))
 
-    form.full_name.data = current_user.full_name
-    if current_user.role == 'student':
-        form.level.data = current_user.level
+        return redirect(url_for('interpreter_dashboard'))
+
+    if request.method == 'GET':
+        form.full_name.data = current_user.full_name
+
+        if current_user.role == 'student':
+            form.matric_number.data = current_user.matric_number
+            form.department.data = current_user.department
+            form.level.data = current_user.level
 
     return render_template('edit_profile.html', form=form)
+
 
 
 from forms import TimetableForm

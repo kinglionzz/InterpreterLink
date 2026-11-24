@@ -171,14 +171,26 @@
                                     </div>
                                     <div>
                                         {% if class.assignment %}
-                                            {% if class.assignment.status == 'Assigned' %}
-                                                <span class="badge bg-primary">Assigned</span>
-                                            {% elif class.assignment.status == 'Present' %}
-                                                <span class="badge bg-success">Present</span>
-                                            {% elif class.assignment.status == 'Absent' %}
-                                                <span class="badge bg-danger">Absent</span>
+                                            <span class="badge bg-primary">
+                                                {{ class.assignment.status }}
+                                            </span>
+
+                                            <br>
+
+                                            {% set attendance = class.assignment.attendance_status or 'Not Yet Confirmed' %}
+
+                                            {% if attendance == 'Present' %}
+                                                <span class="badge bg-success mt-1">Present</span>
+                                            {% elif attendance == 'Absent' %}
+                                                <span class="badge bg-danger mt-1">Absent</span>
+                                            {% elif attendance == 'Class Cancelled' %}
+                                                <span class="badge bg-secondary mt-1">Class Cancelled</span>
+                                            {% elif attendance == 'Interpreter Replaced' %}
+                                                <span class="badge bg-info mt-1">Interpreter Replaced</span>
+                                            {% elif attendance == 'Lecturer Absent' %}
+                                                <span class="badge bg-warning text-dark mt-1">Lecturer Absent</span>
                                             {% else %}
-                                                <span class="badge bg-secondary">{{ class.assignment.status }}</span>
+                                                <span class="badge bg-secondary mt-1">Not Yet Confirmed</span>
                                             {% endif %}
                                         {% else %}
                                             <span class="badge bg-warning text-dark">Pending</span>
@@ -201,23 +213,45 @@
 
                                 {% if is_class_rep %}
                                 <div class="d-flex gap-2 flex-wrap">
-                                    {% if class.assignment and class.assignment.status == 'Assigned' %}
+                                    {% if class.assignment and class.assignment.interpreter_id %}
                                         <a href="{{ url_for('mark_attendance', assignment_id=class.assignment.id, status='Present') }}"
                                            class="btn btn-success btn-sm"
-                                           onclick="return confirm('Mark as Present?')">Present</a>
+                                           onclick="return confirm('Mark interpreter as Present?')">
+                                            Present
+                                        </a>
+
                                         <a href="{{ url_for('mark_attendance', assignment_id=class.assignment.id, status='Absent') }}"
                                            class="btn btn-danger btn-sm"
-                                           onclick="return confirm('Mark as Absent?')">Absent</a>
+                                           onclick="return confirm('Mark interpreter as Absent?')">
+                                            Absent
+                                        </a>
+
+                                        <a href="{{ url_for('mark_attendance', assignment_id=class.assignment.id, status='Class Cancelled') }}"
+                                           class="btn btn-secondary btn-sm"
+                                           onclick="return confirm('Mark this class as cancelled?')">
+                                            Class Cancelled
+                                        </a>
+
+                                        <a href="{{ url_for('mark_attendance', assignment_id=class.assignment.id, status='Interpreter Replaced') }}"
+                                           class="btn btn-info btn-sm"
+                                           onclick="return confirm('Mark interpreter as replaced?')">
+                                            Interpreter Replaced
+                                        </a>
+
+                                        <a href="{{ url_for('mark_attendance', assignment_id=class.assignment.id, status='Lecturer Absent') }}"
+                                           class="btn btn-warning btn-sm"
+                                           onclick="return confirm('Mark lecturer as absent?')">
+                                            Lecturer Absent
+                                        </a>
+
                                     {% endif %}
-                                    <a href="{{ url_for('delete_timetable', id=class.id) }}"
-                                       class="btn btn-outline-danger btn-sm"
-                                       onclick="return confirm('Delete this class?')">Delete</a>
                                 </div>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                     {% endfor %}
+
                 </div>
             {% else %}
                 <p class="text-muted">No classes added yet.</p>

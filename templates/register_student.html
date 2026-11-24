@@ -14,10 +14,10 @@
 
                     <div class="mb-3">
                         {{ form.matric_number.label(class="form-label") }}
-                        {{ form.matric_number(class="form-control", placeholder="e.g. CSC/2023/001") }}
-                        {% for error in form.matric_number.errors %}
-                            <small class="text-danger">{{ error }}</small>
-                        {% endfor %}
+                        {{ form.matric_number(class="form-control", placeholder="Enter Matric number(Optional)") }}
+                        <small class="text-muted">
+                            Fresh students without matric numbers can leave this blank
+                        </small>
                     </div>
 
                     <div class="mb-3">
