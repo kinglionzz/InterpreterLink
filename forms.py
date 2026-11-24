@@ -167,11 +167,19 @@ class TimetableForm(FlaskForm):
     ], validators=[DataRequired()])
 
     # New time fields
-    start_hour = SelectField('Start Hour', choices=[(str(i), f'{i:02d}') for i in range(1, 13)], validators=[DataRequired()])
+    start_hour = SelectField(
+        'Start Hour',
+        choices=[(f'{i:02d}', f'{i:02d}') for i in range(1, 13)],
+        validators=[DataRequired()]
+    )
     start_minute = SelectField('Start Minute', choices=[('00', '00'), ('30', '30')], validators=[DataRequired()])
     start_ampm = SelectField('AM/PM', choices=[('AM', 'AM'), ('PM', 'PM')], validators=[DataRequired()])
 
-    end_hour = SelectField('End Hour', choices=[(str(i), f'{i:02d}') for i in range(1, 13)], validators=[DataRequired()])
+    end_hour = SelectField(
+        'End Hour',
+        choices=[(f'{i:02d}', f'{i:02d}') for i in range(1, 13)],
+        validators=[DataRequired()]
+    )
     end_minute = SelectField('End Minute', choices=[('00', '00'), ('30', '30')], validators=[DataRequired()])
     end_ampm = SelectField('AM/PM', choices=[('AM', 'AM'), ('PM', 'PM')], validators=[DataRequired()])
 
