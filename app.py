@@ -721,6 +721,7 @@ def edit_profile():
 from forms import TimetableForm
 from models import Timetable, Assignment
 
+
 @app.route('/student/timetable', methods=['GET', 'POST'])
 @login_required
 def student_timetable():
@@ -735,48 +736,44 @@ def student_timetable():
             flash('Only the Class Representative can upload the timetable.', 'danger')
             return redirect(url_for('student_timetable'))
 
-        if not current_user.department or not current_user.level:
-            flash('Please update your profile with Department and Level before adding classes.', 'danger')
-            return redirect(url_for('edit_profile'))
+        start_time = f"{form.start_hour.data}:{form.start_minute.data} {form.start_ampm.data}"
+        end_time = f"{form.end_hour.data}:{form.end_minute.data} {form.end_ampm.data}"
+        full_time = f"{start_time} - {end_time}"
 
-        valid_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-        if form.day.data not in valid_days:
-            flash('Please select a valid day from the dropdown.', 'danger')
-        else:
-            start_time = f"{form.start_hour.data}:{form.start_minute.data} {form.start_ampm.data}"
-            end_time = f"{form.end_hour.data}:{form.end_minute.data} {form.end_ampm.data}"
-            full_time = f"{start_time} - {end_time}"
+        new_class = Timetable(
+            student_id=current_user.id,
+            department=current_user.department,
+            level=current_user.level,
+            course_code=form.course_code.data.upper(),
+            course_title=form.course_title.data,
+            day=form.day.data,
+            time=full_time,
+            venue=form.venue.data,
+            lecturer=form.lecturer.data
+        )
 
-            new_class = Timetable(
-                student_id=current_user.id,
-                department=current_user.department,
-                level=current_user.level,
-                course_code=form.course_code.data.strip().upper(),
-                course_title=form.course_title.data.strip(),
-                day=form.day.data,
-                time=full_time,
-                venue=form.venue.data.strip(),
-                lecturer=(form.lecturer.data or '').strip() or None
+        db.session.add(new_class)
+        db.session.commit()
+
+        assigned_interpreter = auto_assign_interpreter(new_class)
+
+        if assigned_interpreter:
+            flash(
+                f'Class added and Interpreter {assigned_interpreter.full_name} assigned!',
+                'success'
             )
-            db.session.add(new_class)
-            db.session.commit()
+        else:
+            flash('Class added. No interpreter available yet.', 'warning')
 
-            assigned_interpreter = auto_assign_interpreter(new_class)
+        return redirect(url_for('student_timetable'))
 
-            if assigned_interpreter:
-                flash(f'Class added and Interpreter {assigned_interpreter.full_name} assigned!', 'success')
-            else:
-                flash('Class added. No interpreter available yet.', 'warning')
+    else:
+        if request.method == 'POST':
+            print("TIMETABLE FORM ERRORS:", form.errors)
 
-            return redirect(url_for('student_timetable'))
-
-    # Show clear errors when validation fails (instead of silent fail)
-    if form.is_submitted() and form.errors:
-        messages = []
-        for field_errors in form.errors.values():
-            messages.extend(field_errors)
-        if messages:
-            flash('Please complete all required fields: ' + ' | '.join(messages), 'danger')
+            for field, errors in form.errors.items():
+                for error in errors:
+                    flash(f'{field}: {error}', 'danger')
 
     classes = Timetable.query.filter_by(
         department=current_user.department,
@@ -789,6 +786,30 @@ def student_timetable():
         classes=classes,
         is_class_rep=current_user.is_class_rep
     )
+
+
+
+@app.route('/student/timetable/delete/<int:id>')
+@login_required
+def delete_timetable(id):
+    if current_user.role != 'student' or not current_user.is_class_rep:
+        flash('Only the Class Representative can delete classes.', 'danger')
+        return redirect(url_for('student_timetable'))
+
+    class_item = Timetable.query.get_or_404(id)
+
+    # Make sure it belongs to the same department & level
+    if class_item.department != current_user.department or class_item.level != current_user.level:
+        flash('You cannot delete this class.', 'danger')
+        return redirect(url_for('student_timetable'))
+
+    if class_item.assignment:
+        db.session.delete(class_item.assignment)
+
+    db.session.delete(class_item)
+    db.session.commit()
+    flash('Class deleted successfully.', 'info')
+    return redirect(url_for('student_timetable'))
 
 @app.route('/hoi/reassign/<int:timetable_id>', methods=['GET', 'POST'])
 @login_required

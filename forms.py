@@ -158,16 +158,33 @@ class EditProfileForm(FlaskForm):
 class TimetableForm(FlaskForm):
     course_code = StringField('Course Code', validators=[DataRequired(), Length(max=20)])
     course_title = StringField('Course Title', validators=[DataRequired(), Length(max=150)])
-    # StringField works with your custom dropdowns (hidden inputs)
-    day = StringField('Day', validators=[DataRequired(message='Please select a day.')])
-    start_hour = StringField('Start Hour', validators=[DataRequired(message='Please select start hour.')])
-    start_minute = StringField('Start Minute', validators=[DataRequired(message='Please select start minute.')])
-    start_ampm = StringField('Start AM/PM', validators=[DataRequired(message='Please select AM or PM.')])
-    end_hour = StringField('End Hour', validators=[DataRequired(message='Please select end hour.')])
-    end_minute = StringField('End Minute', validators=[DataRequired(message='Please select end minute.')])
-    end_ampm = StringField('End AM/PM', validators=[DataRequired(message='Please select AM or PM.')])
+    day = SelectField('Day', choices=[
+        ('Monday', 'Monday'),
+        ('Tuesday', 'Tuesday'),
+        ('Wednesday', 'Wednesday'),
+        ('Thursday', 'Thursday'),
+        ('Friday', 'Friday')
+    ], validators=[DataRequired()])
+
+    # New time fields
+    start_hour = SelectField(
+        'Start Hour',
+        choices=[(f'{i:02d}', f'{i:02d}') for i in range(1, 13)],
+        validators=[DataRequired()]
+    )
+    start_minute = SelectField('Start Minute', choices=[('00', '00'), ('30', '30')], validators=[DataRequired()])
+    start_ampm = SelectField('AM/PM', choices=[('AM', 'AM'), ('PM', 'PM')], validators=[DataRequired()])
+
+    end_hour = SelectField(
+        'End Hour',
+        choices=[(f'{i:02d}', f'{i:02d}') for i in range(1, 13)],
+        validators=[DataRequired()]
+    )
+    end_minute = SelectField('End Minute', choices=[('00', '00'), ('30', '30')], validators=[DataRequired()])
+    end_ampm = SelectField('AM/PM', choices=[('AM', 'AM'), ('PM', 'PM')], validators=[DataRequired()])
+
     venue = StringField('Venue', validators=[DataRequired()])
-    lecturer = StringField('Lecturer Name', validators=[Optional()])
+    lecturer = StringField('Lecturer Name')
     submit = SubmitField('Add Class')
 
 class ComplaintForm(FlaskForm):
