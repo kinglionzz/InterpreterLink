@@ -8,6 +8,18 @@
                 <h3 class="text-center mb-4">HOI Registration</h3>
                 <form method="POST">
                     {{ form.hidden_tag() }}
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Please correct these errors:</strong>
+                        <ul class="mb-0">
+                            {% for field, errors in form.errors.items() %}
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
                     <div class="mb-3">
                         {{ form.code.label(class="form-label") }}
                         {{ form.code(class="form-control", placeholder="Enter code from Admin") }}

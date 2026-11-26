@@ -488,6 +488,56 @@ def hoi_complaints():
     return render_template('hoi_complaints.html', complaints=complaints)
 
 
+@app.route('/hoi/timetable/<int:timetable_id>/approve', methods=['POST'])
+@login_required
+def hoi_approve_timetable(timetable_id):
+    if current_user.role != 'hoi':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('index'))
+
+    timetable = Timetable.query.get_or_404(timetable_id)
+
+    if not timetable.assignment or not timetable.assignment.interpreter_id:
+        flash('Assign an interpreter before approving this timetable.', 'danger')
+        return redirect(url_for('hoi_dashboard'))
+
+    timetable.approval_status = 'Approved'
+    timetable.approved_by = current_user.id
+    timetable.approved_at = datetime.utcnow()
+    timetable.rejection_reason = None
+
+    db.session.commit()
+
+    flash('Timetable approved and released to students!', 'success')
+    return redirect(url_for('hoi_dashboard'))
+
+
+@app.route('/hoi/timetable/<int:timetable_id>/reject', methods=['POST'])
+@login_required
+def hoi_reject_timetable(timetable_id):
+    if current_user.role != 'hoi':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('index'))
+
+    timetable = Timetable.query.get_or_404(timetable_id)
+    reason = request.form.get('rejection_reason', '').strip()
+
+    if not reason:
+        flash('Please provide a reason for rejecting this timetable.', 'danger')
+        return redirect(url_for('hoi_dashboard'))
+
+    timetable.approval_status = 'Rejected'
+    timetable.approved_by = None
+    timetable.approved_at = None
+    timetable.rejection_reason = reason
+
+    db.session.commit()
+
+    flash('Timetable rejected. The Class Rep can now see the reason.', 'warning')
+    return redirect(url_for('hoi_dashboard'))
+
+
+
 @app.route('/hoi/complaints/reply/<int:complaint_id>', methods=['GET', 'POST'])
 @login_required
 def hoi_reply_complaint(complaint_id):

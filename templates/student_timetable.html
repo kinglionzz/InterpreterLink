@@ -204,10 +204,23 @@
                                 <p class="mb-1"><strong>Lecturer:</strong> {{ class.lecturer or '-' }}</p>
                                 <p class="mb-3">
                                     <strong>Interpreter:</strong>
-                                    {% if class.assignment and class.assignment.interpreter %}
-                                        {{ class.assignment.interpreter.full_name }}
+
+                                    {% if class.approval_status == 'Approved' %}
+                                        {% if class.assignment and class.assignment.interpreter %}
+                                            <span class="text-success fw-bold">
+                                                {{ class.assignment.interpreter.full_name }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">Not assigned</span>
+                                        {% endif %}
+
+                                    {% elif class.assignment and class.assignment.interpreter %}
+                                        <span class="badge bg-warning text-dark">
+                                            Pending HOI Approval
+                                        </span>
+
                                     {% else %}
-                                        <span class="text-muted">Not assigned</span>
+                                        <span class="text-muted">Interpreter not assigned yet</span>
                                     {% endif %}
                                 </p>
 

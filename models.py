@@ -64,26 +64,60 @@ def generate_registration_code():
     return secrets.token_hex(4).upper()
 
 
+
 class Timetable(db.Model):
     __tablename__ = 'timetables'
 
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    student_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        nullable=False
+    )
+
     course_code = db.Column(db.String(20), nullable=False)
     course_title = db.Column(db.String(150), nullable=False)
-    day = db.Column(db.String(20), nullable=False)  # Monday, Tuesday, etc.
-    time = db.Column(db.String(30), nullable=False)  # e.g. 09:00 - 11:00
+    day = db.Column(db.String(20), nullable=False)
+    time = db.Column(db.String(30), nullable=False)
     venue = db.Column(db.String(100), nullable=False)
     lecturer = db.Column(db.String(100))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Relationship
-    student = db.relationship('User', backref='timetables')
     department = db.Column(db.String(100), nullable=False)
-    level = db.Column(db.String(10), nullable=False)  # 100L, 200L, etc.
+    level = db.Column(db.String(10), nullable=False)
+
+    # HOI timetable approval
+    approval_status = db.Column(
+        db.String(20),
+        default='Pending',
+        nullable=False
+    )
+
+    approved_by = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        nullable=True
+    )
+
+    approved_at = db.Column(db.DateTime, nullable=True)
+    rejection_reason = db.Column(db.Text, nullable=True)
+
+    # Relationships
+    student = db.relationship(
+        'User',
+        foreign_keys=[student_id],
+        backref='timetables'
+    )
+
+    approved_by_user = db.relationship(
+        'User',
+        foreign_keys=[approved_by],
+        backref='approved_timetables'
+    )
 
     def __repr__(self):
         return f'<Timetable {self.course_code} on {self.day}>'
+
 
 
 class Assignment(db.Model):

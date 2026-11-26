@@ -1,65 +1,158 @@
+
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card p-4">
-            <h4 class="fw-bold mb-3">Re-assign Interpreter</h4>
 
-            <div class="mb-4">
-                <p><strong>Course:</strong> {{ timetable.course_code }} - {{ timetable.course_title }}</p>
-                <p><strong>Day & Time:</strong> {{ timetable.day }} | {{ timetable.time }}</p>
-                <p><strong>Venue:</strong> {{ timetable.venue }}</p>
-                <p><strong>Department:</strong> {{ timetable.department }} {{ timetable.level }}</p>
+<div class="container mt-4">
+
+    <h3 class="fw-bold mb-4">Head of Interpreters Dashboard</h3>
+
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card p-3 shadow-sm">
+                <h6>Total Active Interpreters</h6>
+                <h3>{{ total_interpreters }}</h3>
             </div>
+        </div>
 
-            <form method="POST">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Select New Interpreter</label>
+        <div class="col-md-4 mb-3">
+            <div class="card p-3 shadow-sm">
+                <h6>Total Classes</h6>
+                <h3>{{ classes|length }}</h3>
+            </div>
+        </div>
 
-                    <div class="custom-dropdown" id="interpreterDropdown">
-                        <div class="custom-dropdown-selected" onclick="toggleInterpreterDropdown()">
-                            <span id="selectedInterpreterText">-- Choose Interpreter --</span>
-                            <span class="dropdown-arrow">▼</span>
-                        </div>
-                        <div class="custom-dropdown-options" id="interpreterOptions">
-                            {% for interp in interpreters %}
-                            <div class="custom-option" onclick="selectInterpreter('{{ interp.id }}', '{{ interp.full_name }}')">
-                                {{ interp.full_name }}
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <input type="hidden" name="interpreter_id" id="interpreterInput" value="">
-                </div>
-
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary">Confirm Re-assign</button>
-                    <a href="{{ url_for('hoi_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
-                </div>
-            </form>
+        <div class="col-md-4 mb-3">
+            <div class="card p-3 shadow-sm">
+                <h6>Open Complaints</h6>
+                <h3>{{ open_complaints_count }}</h3>
+                <a href="{{ url_for('hoi_complaints') }}">View Complaints</a>
+            </div>
         </div>
     </div>
+
+    <div class="card shadow-sm p-3 mb-4">
+        <h5 class="fw-bold mb-3">Class Timetables</h5>
+
+        {% if classes %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Department</th>
+                        <th>Level</th>
+                        <th>Day</th>
+                        <th>Time</th>
+                        <th>Venue</th>
+                        <th>Interpreter</th>
+                        <th>Approval Status</th>
+                        <th style="min-width: 230px;">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for timetable in classes %}
+                    <tr>
+                        <td>
+                            {{ timetable.course_code }} -
+                            {{ timetable.course_title }}
+                        </td>
+
+                        <td>{{ timetable.department }}</td>
+                        <td>{{ timetable.level }}</td>
+                        <td>{{ timetable.day }}</td>
+                        <td>{{ timetable.time }}</td>
+                        <td>{{ timetable.venue }}</td>
+
+                        <td>
+                            {% if timetable.assignment and timetable.assignment.interpreter %}
+                                {{ timetable.assignment.interpreter.full_name }}
+                            {% else %}
+                                <span class="text-warning">Not Assigned</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if timetable.approval_status == 'Approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif timetable.approval_status == 'Rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                                {% if timetable.rejection_reason %}
+                                    <div class="small text-danger mt-2">
+                                        Reason: {{ timetable.rejection_reason }}
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="d-grid gap-2">
+
+                                <a href="{{ url_for('hoi_reassign', timetable_id=timetable.id) }}"
+                                   class="btn btn-sm btn-primary">
+                                    Re-assign Interpreter
+                                </a>
+
+                                {% if timetable.approval_status != 'Approved' %}
+                                    <form method="POST"
+                                          action="{{ url_for('hoi_approve_timetable', timetable_id=timetable.id) }}">
+
+                                        <button type="submit"
+                                                class="btn btn-sm btn-success w-100">
+                                            Approve & Release
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                <form method="POST"
+                                      action="{{ url_for('hoi_reject_timetable', timetable_id=timetable.id) }}">
+
+                                    <textarea name="rejection_reason"
+                                              class="form-control form-control-sm mb-2"
+                                              rows="2"
+                                              placeholder="Reason for rejection..."
+                                              required></textarea>
+
+                                    <button type="submit"
+                                            class="btn btn-sm btn-danger w-100">
+                                        Reject Timetable
+                                    </button>
+                                </form>
+
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="text-muted">No classes have been uploaded yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="card shadow-sm p-3">
+        <h5 class="fw-bold mb-3">Interpreter Availability Summary</h5>
+
+        {% if slot_summary %}
+            {% for slot, summary in slot_summary.items() %}
+                <div class="border-bottom py-2">
+                    <strong>{{ slot }}</strong>
+                    <p class="mb-0">
+                        Total: {{ summary.total }} |
+                        Assigned: {{ summary.assigned }} |
+                        Pending: {{ summary.pending }}
+                    </p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No timetable information available.</p>
+        {% endif %}
+    </div>
+
 </div>
 
-<script>
-function toggleInterpreterDropdown() {
-    const options = document.getElementById('interpreterOptions');
-    options.style.display = options.style.display === 'block' ? 'none' : 'block';
-}
-
-function selectInterpreter(id, name) {
-    document.getElementById('selectedInterpreterText').innerText = name;
-    document.getElementById('interpreterInput').value = id;
-    document.getElementById('interpreterOptions').style.display = 'none';
-}
-
-document.addEventListener('click', function(e) {
-    const dropdown = document.getElementById('interpreterDropdown');
-    if (dropdown && !dropdown.contains(e.target)) {
-        document.getElementById('interpreterOptions').style.display = 'none';
-    }
-});
-</script>
 {% endblock %}
