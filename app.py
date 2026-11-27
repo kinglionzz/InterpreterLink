@@ -944,22 +944,26 @@ def hoi_reassign(timetable_id):
         interpreters=interpreters
     )
 
-# ========== CREATE TABLES + FIRST ADMIN ==========
-with app.app_context():
-    db.create_all()
+# ========== DATABASE INITIALIZATION ==========
 
-    # Create first Admin if none exists
-    admin = User.query.filter_by(role='admin').first()
-    if not admin:
-        admin = User(
-            email='admin@interpreterlink.com',
-            full_name='System Admin',
-            role='admin'
-        )
-        admin.set_password('admin123')
-        db.session.add(admin)
-        db.session.commit()
-        print("Admin created → Email: admin@interpreterlink.com | Password: admin123")
+def initialize_database():
+    with app.app_context():
+        db.create_all()
+
+        admin = User.query.filter_by(role='admin').first()
+
+        if not admin:
+            admin = User(
+                email='admin@interpreterlink.com',
+                full_name='System Admin',
+                role='admin'
+            )
+            admin.set_password('admin123')
+            db.session.add(admin)
+            db.session.commit()
+
+            print("First Admin account created.")
 
 if __name__ == '__main__':
+    initialize_database()
     app.run(debug=True)
