@@ -184,3 +184,43 @@ class Complaint(db.Model):
 
     def __repr__(self):
         return f'<Complaint {self.id} - {self.category}>'
+
+class Notification(db.Model):
+    __tablename__ = 'notifications'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    recipient_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        nullable=False
+    )
+
+    timetable_id = db.Column(
+        db.Integer,
+        db.ForeignKey('timetables.id'),
+        nullable=True
+    )
+
+    title = db.Column(db.String(150), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+
+    is_read = db.Column(db.Boolean, default=False, nullable=False)
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    recipient = db.relationship(
+        'User',
+        backref=db.backref('notifications', lazy=True)
+    )
+
+    timetable = db.relationship(
+        'Timetable',
+        backref=db.backref('notifications', lazy=True)
+    )
+
+    def __repr__(self):
+        return f'<Notification {self.id} - {self.title}>'

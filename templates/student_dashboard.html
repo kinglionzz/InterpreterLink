@@ -90,4 +90,60 @@
 
     </div>
 </div>
+
+        <!-- Class Rep Notifications -->
+        {% if current_user.is_class_rep %}
+        <div class="card p-4 mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">🔔 Notifications</h5>
+
+                {% if unread_notifications > 0 %}
+                    <span class="badge bg-danger">
+                        {{ unread_notifications }} Unread
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <div class="border rounded-3 p-3 mb-3
+                        {% if not notification.is_read %}bg-light{% endif %}">
+
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ notification.title }}</strong>
+
+                            {% if not notification.is_read %}
+                                <span class="badge bg-warning text-dark">
+                                    New
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <p class="mb-2 mt-2">
+                            {{ notification.message }}
+                        </p>
+
+                        <small class="text-muted">
+                            {{ notification.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                        </small>
+                        {% if not notification.is_read %}
+                            <form method="POST"
+                                  action="{{ url_for('mark_notification_read', notification_id=notification.id) }}"
+                                  class="mt-2">
+
+                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                    Mark as Read
+                                </button>
+
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted mb-0">
+                    You don't have any notifications yet.
+                </p>
+            {% endif %}
+        </div>
+        {% endif %}
 {% endblock %}

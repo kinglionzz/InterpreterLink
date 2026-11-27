@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from config import Config
-from models import db, User, RegistrationCode, generate_registration_code
+from models import db, User, RegistrationCode, Timetable, Notification, generate_registration_code
 from forms import StudentRegisterForm, InterpreterRegisterForm, HOIRegisterForm, LoginForm, ProfileForm, EditProfileForm
 from datetime import datetime
 import os
@@ -531,6 +531,17 @@ def hoi_reject_timetable(timetable_id):
     timetable.approved_at = None
     timetable.rejection_reason = reason
 
+    # Create notification for the Class Rep
+    notification = Notification(
+        recipient_id=timetable.student_id,
+        timetable_id=timetable.id,
+        title='Timetable Rejected',
+        message=f'Your timetable for {timetable.course_code} - '
+                f'{timetable.course_title} was rejected by the HOI. '
+                f'Reason: {reason}'
+    )
+
+    db.session.add(notification)
     db.session.commit()
 
     flash('Timetable rejected. The Class Rep can now see the reason.', 'warning')
@@ -592,13 +603,45 @@ def student_dashboard():
     # Count student's complaints
     complaints_count = Complaint.query.filter_by(student_id=current_user.id).count()
 
+    # Get notifications for Class Rep
+    notifications = []
+    unread_notifications = 0
+
+    if current_user.is_class_rep:
+        notifications = Notification.query.filter_by(
+            recipient_id=current_user.id
+        ).order_by(Notification.created_at.desc()).all()
+
+        unread_notifications = Notification.query.filter_by(
+            recipient_id=current_user.id,
+            is_read=False
+        ).count()
+
     return render_template(
         'student_dashboard.html',
         total_classes=total_classes,
         assigned_classes=assigned_classes,
         present_count=present_count,
-        complaints_count=complaints_count
+        complaints_count=complaints_count,
+        notifications=notifications,
+        unread_notifications=unread_notifications
     )
+
+@app.route('/notifications/<int:notification_id>/read', methods=['POST'])
+@login_required
+def mark_notification_read(notification_id):
+
+    notification = Notification.query.get_or_404(notification_id)
+
+    if notification.recipient_id != current_user.id:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('index'))
+
+    notification.is_read = True
+    db.session.commit()
+
+    flash('Notification marked as read.', 'success')
+    return redirect(url_for('student_dashboard'))
 
 @app.route('/interpreter/dashboard')
 @login_required
